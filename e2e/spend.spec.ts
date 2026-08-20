@@ -12,13 +12,16 @@ test.describe.serial('Spend e2e', () => {
 
     await page.getByRole('tab', { name: /expenses|gastos/i }).click();
     await page.getByRole('button', { name: 'Add expense' }).click();
-    await expect(page.getByText('Choose a card')).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Card' })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: 'Date' })).toHaveCount(0);
     await page.getByRole('textbox', { name: 'Name', exact: true }).fill('Coffee');
     await page.getByRole('textbox', { name: 'Amount', exact: true }).fill('2.50');
     await page.getByRole('button', { name: 'Clear Amount' }).click();
     await expect(page.getByRole('textbox', { name: 'Amount', exact: true })).toHaveValue('');
     await page.getByRole('textbox', { name: 'Amount', exact: true }).fill('2.50');
+    await page.getByRole('combobox', { name: 'Card' }).click();
     await page.getByRole('button', { name: 'Card: Visa' }).click();
+    await page.getByRole('combobox', { name: 'Category' }).click();
     await page.getByRole('button', { name: 'Category: Food' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByText('Coffee')).toBeVisible();

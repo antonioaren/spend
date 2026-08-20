@@ -32,6 +32,7 @@ export const messages = {
       chooseCategory: 'Choose a category',
       noCardsYet: 'No cards yet. Add one in Library.',
       noCategoriesYet: 'No categories yet. Add one in Library.',
+      customDate: 'Custom date',
     },
     library: {
       cards: 'Cards',
@@ -124,6 +125,7 @@ export const messages = {
       chooseCategory: 'Elige una categoría',
       noCardsYet: 'Aún no hay tarjetas. Añade una en Biblioteca.',
       noCategoriesYet: 'Aún no hay categorías. Añade una en Biblioteca.',
+      customDate: 'Fecha personalizada',
     },
     library: {
       cards: 'Tarjetas',

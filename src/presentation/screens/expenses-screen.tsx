@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSpend } from '@/presentation/spend-context';
-import { Body, Field, GhostButton, PrimaryButton, Row, Screen, SelectField, Title } from '@/presentation/components/ui';
+import { Body, CheckField, Field, GhostButton, PrimaryButton, Row, Screen, SelectField, Title } from '@/presentation/components/ui';
 import { formatMoney } from '@/domain/money';
 import { spacing, type } from '@/theme';
 import { DomainError } from '@/domain/errors';
@@ -19,6 +19,7 @@ export function ExpensesScreen() {
   const [filters, setFilters] = useState({ from: '', to: '', min: '', max: '', name: '', categoryId: '' });
   const [showForm, setShowForm] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [customDate, setCustomDate] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
   const title =
@@ -32,10 +33,11 @@ export function ExpensesScreen() {
         amount: form.amount,
         cardId: form.cardId || state.cards[0]?.id || '',
         categoryId: form.categoryId || state.categories[0]?.id || '',
-        date: form.date || undefined,
-        time: form.time || undefined,
+        date: customDate ? form.date || undefined : undefined,
+        time: customDate ? form.time || undefined : undefined,
       });
       setForm({ name: '', amount: '', cardId: '', categoryId: '', date: '', time: '' });
+      setCustomDate(false);
       setShowForm(false);
       await reload();
     } catch (caught) {
@@ -132,8 +134,21 @@ export function ExpensesScreen() {
               options={state.categories.map((category) => ({ id: category.id, label: category.name }))}
               onChange={(categoryId) => setForm((f) => ({ ...f, categoryId }))}
             />
-            <Field palette={palette} label={tx('expenses.date')} value={form.date} onChangeText={(date) => setForm((f) => ({ ...f, date }))} placeholder="YYYY-MM-DD" />
-            <Field palette={palette} label={tx('expenses.time')} value={form.time} onChangeText={(time) => setForm((f) => ({ ...f, time }))} placeholder="HH:mm" />
+            <CheckField
+              palette={palette}
+              label={tx('expenses.customDate')}
+              checked={customDate}
+              onChange={(checked) => {
+                setCustomDate(checked);
+                if (!checked) setForm((current) => ({ ...current, date: '', time: '' }));
+              }}
+            />
+            {customDate ? (
+              <>
+                <Field palette={palette} label={tx('expenses.date')} value={form.date} onChangeText={(date) => setForm((f) => ({ ...f, date }))} placeholder="YYYY-MM-DD" />
+                <Field palette={palette} label={tx('expenses.time')} value={form.time} onChangeText={(time) => setForm((f) => ({ ...f, time }))} placeholder="HH:mm" />
+              </>
+            ) : null}
             {error ? <Text style={[type.caption, { color: palette.danger }]}>{error}</Text> : null}
             <PrimaryButton palette={palette} label={tx('expenses.save')} onPress={() => void save()} />
             <GhostButton palette={palette} label={tx('expenses.cancel')} onPress={() => setShowForm(false)} />

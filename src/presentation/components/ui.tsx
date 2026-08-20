@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { useState } from 'react';
 import { radius, spacing, type } from '@/theme';
 import type { Palette } from '@/theme';
 
@@ -113,40 +114,95 @@ export function SelectField({
   options: { id: string; label: string }[];
   onChange: (id: string) => void;
 }) {
-  return (
-    <View style={styles.field} accessibilityLabel={label}>
-      <Text style={[type.caption, { color: palette.muted }]}>{label}</Text>
-      {options.length === 0 ? (
+  const [open, setOpen] = useState(false);
+  const selected = options.find((option) => option.id === value);
+
+  if (options.length === 0) {
+    return (
+      <View style={styles.field}>
+        <Text style={[type.caption, { color: palette.muted }]}>{label}</Text>
         <Text style={[type.body, { color: palette.muted }]}>{emptyText}</Text>
-      ) : (
-        <View style={{ gap: spacing.sm }}>
-          <Text style={[type.caption, { color: palette.muted }]}>{placeholder}</Text>
-          {options.map((option) => {
-            const selected = value === option.id;
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.field}>
+      <Text style={[type.caption, { color: palette.muted }]}>{label}</Text>
+      <Pressable
+        accessibilityRole="combobox"
+        accessibilityLabel={label}
+        accessibilityState={{ expanded: open }}
+        onPress={() => setOpen((current) => !current)}
+        style={[styles.dropdown, { borderColor: palette.line, backgroundColor: palette.surface }]}
+      >
+        <Text style={[type.body, { color: selected ? palette.text : palette.muted, flex: 1 }]}>
+          {selected?.label ?? placeholder}
+        </Text>
+        <Text style={[type.body, { color: palette.muted }]}>{open ? '▴' : '▾'}</Text>
+      </Pressable>
+      {open
+        ? options.map((option) => {
+            const isSelected = value === option.id;
             return (
               <Pressable
                 key={option.id}
                 accessibilityRole="button"
-                accessibilityState={{ selected }}
+                accessibilityState={{ selected: isSelected }}
                 accessibilityLabel={`${label}: ${option.label}`}
-                onPress={() => onChange(option.id)}
+                onPress={() => {
+                  onChange(option.id);
+                  setOpen(false);
+                }}
                 style={[
                   styles.selectOption,
                   {
-                    borderColor: selected ? palette.accent : palette.line,
-                    backgroundColor: selected ? palette.accent : palette.surface,
+                    borderColor: isSelected ? palette.accent : palette.line,
+                    backgroundColor: isSelected ? palette.accent : palette.surface,
                   },
                 ]}
               >
-                <Text style={[type.body, { color: selected ? '#fff' : palette.text }]}>
-                  {option.label}
-                </Text>
+                <Text style={[type.body, { color: isSelected ? '#fff' : palette.text }]}>{option.label}</Text>
               </Pressable>
             );
-          })}
-        </View>
-      )}
+          })
+        : null}
     </View>
+  );
+}
+
+export function CheckField({
+  palette,
+  label,
+  checked,
+  onChange,
+}: {
+  palette: Palette;
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="checkbox"
+      accessibilityLabel={label}
+      accessibilityState={{ checked }}
+      onPress={() => onChange(!checked)}
+      style={styles.checkRow}
+    >
+      <View
+        style={[
+          styles.checkbox,
+          {
+            borderColor: checked ? palette.accent : palette.line,
+            backgroundColor: checked ? palette.accent : 'transparent',
+          },
+        ]}
+      >
+        {checked ? <Text style={[type.caption, { color: '#fff' }]}>✓</Text> : null}
+      </View>
+      <Text style={[type.body, { color: palette.text }]}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -215,6 +271,29 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
+  },
+  dropdown: {
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  checkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   row: {
     borderRadius: radius.md,

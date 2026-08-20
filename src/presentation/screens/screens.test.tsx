@@ -35,11 +35,14 @@ describe('Library and expenses screens', () => {
       </SpendProvider>,
     );
     await user.press(screen.getByRole('button', { name: 'Add expense' }));
-    await waitFor(() => expect(screen.getByLabelText('Card')).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Card' })).toBeTruthy());
     await user.type(screen.getByLabelText('Name'), 'Coffee');
     await user.type(screen.getByLabelText('Amount'), '2.50');
+    await user.press(screen.getByRole('combobox', { name: 'Card' }));
     await user.press(screen.getByRole('button', { name: 'Card: Visa' }));
+    await user.press(screen.getByRole('combobox', { name: 'Category' }));
     await user.press(screen.getByRole('button', { name: 'Category: Food' }));
+    expect(screen.queryByLabelText('Date')).toBeNull();
     await user.press(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(screen.getByText('Coffee')).toBeTruthy());
   });
@@ -56,10 +59,13 @@ describe('Library and expenses screens', () => {
       </SpendProvider>,
     );
     await user.press(await screen.findByRole('button', { name: 'Add expense' }));
-    await waitFor(() => expect(screen.getByLabelText('Card')).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Card' })).toBeTruthy());
+    await user.press(screen.getByRole('combobox', { name: 'Card' }));
     expect(screen.getByRole('button', { name: 'Card: Visa' })).toBeTruthy();
-    expect(screen.getByLabelText('Category')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Category: Food' })).toBeTruthy();
+    expect(screen.queryByLabelText('Date')).toBeNull();
+    await user.press(screen.getByRole('checkbox', { name: 'Custom date' }));
+    expect(screen.getByLabelText('Date')).toBeTruthy();
+    expect(screen.getByLabelText('Time')).toBeTruthy();
   });
 });
 

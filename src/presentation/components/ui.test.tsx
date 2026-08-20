@@ -22,7 +22,8 @@ describe('Field', () => {
 });
 
 describe('SelectField', () => {
-  test('renders the field label and each option', () => {
+  test('keeps options collapsed until the dropdown is opened', async () => {
+    const user = userEvent.setup();
     render(
       <SelectField
         palette={palette}
@@ -34,8 +35,30 @@ describe('SelectField', () => {
         onChange={jest.fn()}
       />,
     );
-    expect(screen.getByLabelText('Card')).toBeTruthy();
+    expect(screen.getByRole('combobox', { name: 'Card' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Card: Visa' })).toBeNull();
+    await user.press(screen.getByRole('combobox', { name: 'Card' }));
     expect(screen.getByRole('button', { name: 'Card: Visa' })).toBeTruthy();
+  });
+
+  test('selecting an option closes the dropdown', async () => {
+    const onChange = jest.fn();
+    const user = userEvent.setup();
+    render(
+      <SelectField
+        palette={palette}
+        label="Card"
+        placeholder="Choose a card"
+        emptyText="No cards yet"
+        value=""
+        options={[{ id: 'c1', label: 'Visa' }]}
+        onChange={onChange}
+      />,
+    );
+    await user.press(screen.getByRole('combobox', { name: 'Card' }));
+    await user.press(screen.getByRole('button', { name: 'Card: Visa' }));
+    expect(onChange).toHaveBeenCalledWith('c1');
+    expect(screen.queryByRole('button', { name: 'Card: Visa' })).toBeNull();
   });
 
   test('shows empty copy when there are no options', () => {
