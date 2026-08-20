@@ -63,17 +63,89 @@ export function GhostButton({
 export function Field({
   palette,
   label,
+  value,
+  onChangeText,
   ...input
 }: { palette: Palette; label: string } & TextInputProps) {
+  const hasValue = String(value ?? '').length > 0;
   return (
     <View style={styles.field}>
       <Text style={[type.caption, { color: palette.muted }]}>{label}</Text>
-      <TextInput
-        accessibilityLabel={label}
-        placeholderTextColor={palette.muted}
-        style={[styles.input, { color: palette.text, borderColor: palette.line, backgroundColor: palette.surface }]}
-        {...input}
-      />
+      <View style={[styles.inputRow, { borderColor: palette.line, backgroundColor: palette.surface }]}>
+        <TextInput
+          accessibilityLabel={label}
+          placeholderTextColor={palette.muted}
+          style={[styles.input, { color: palette.text }]}
+          {...input}
+          value={value}
+          onChangeText={onChangeText}
+        />
+        {hasValue ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Clear ${label}`}
+            onPress={() => onChangeText?.('')}
+            hitSlop={8}
+            style={styles.clear}
+          >
+            <Text style={[type.body, { color: palette.muted }]}>×</Text>
+          </Pressable>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+export function SelectField({
+  palette,
+  label,
+  placeholder,
+  emptyText,
+  value,
+  options,
+  onChange,
+}: {
+  palette: Palette;
+  label: string;
+  placeholder: string;
+  emptyText: string;
+  value: string;
+  options: { id: string; label: string }[];
+  onChange: (id: string) => void;
+}) {
+  return (
+    <View style={styles.field} accessibilityLabel={label}>
+      <Text style={[type.caption, { color: palette.muted }]}>{label}</Text>
+      {options.length === 0 ? (
+        <Text style={[type.body, { color: palette.muted }]}>{emptyText}</Text>
+      ) : (
+        <View style={{ gap: spacing.sm }}>
+          <Text style={[type.caption, { color: palette.muted }]}>{placeholder}</Text>
+          {options.map((option) => {
+            const selected = value === option.id;
+            return (
+              <Pressable
+                key={option.id}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                accessibilityLabel={`${label}: ${option.label}`}
+                onPress={() => onChange(option.id)}
+                style={[
+                  styles.selectOption,
+                  {
+                    borderColor: selected ? palette.accent : palette.line,
+                    backgroundColor: selected ? palette.accent : palette.surface,
+                  },
+                ]}
+              >
+                <Text style={[type.body, { color: selected ? '#fff' : palette.text }]}>
+                  {option.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }
@@ -119,12 +191,30 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   field: { gap: spacing.xs },
-  input: {
+  inputRow: {
     borderWidth: 1,
     borderRadius: radius.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: spacing.xs,
+  },
+  input: {
+    flex: 1,
     paddingHorizontal: spacing.md,
     paddingVertical: 10,
     fontSize: 16,
+  },
+  clear: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  selectOption: {
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
   },
   row: {
     borderRadius: radius.md,

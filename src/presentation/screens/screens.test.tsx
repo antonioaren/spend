@@ -35,12 +35,31 @@ describe('Library and expenses screens', () => {
       </SpendProvider>,
     );
     await user.press(screen.getByRole('button', { name: 'Add expense' }));
+    await waitFor(() => expect(screen.getByLabelText('Card')).toBeTruthy());
     await user.type(screen.getByLabelText('Name'), 'Coffee');
     await user.type(screen.getByLabelText('Amount'), '2.50');
-    await user.press(screen.getByRole('button', { name: 'Visa' }));
-    await user.press(screen.getByRole('button', { name: 'Food' }));
+    await user.press(screen.getByRole('button', { name: 'Card: Visa' }));
+    await user.press(screen.getByRole('button', { name: 'Category: Food' }));
     await user.press(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(screen.getByText('Coffee')).toBeTruthy());
+  });
+
+  test('shows a Card field listing existing cards', async () => {
+    const ports = createMemoryPorts({ now });
+    const app = createSpendApp(ports);
+    await app.cards.create({ name: 'Visa' });
+    await app.categories.create({ name: 'Food' });
+    const user = userEvent.setup();
+    render(
+      <SpendProvider ports={ports}>
+        <ExpensesScreen />
+      </SpendProvider>,
+    );
+    await user.press(await screen.findByRole('button', { name: 'Add expense' }));
+    await waitFor(() => expect(screen.getByLabelText('Card')).toBeTruthy());
+    expect(screen.getByRole('button', { name: 'Card: Visa' })).toBeTruthy();
+    expect(screen.getByLabelText('Category')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Category: Food' })).toBeTruthy();
   });
 });
 

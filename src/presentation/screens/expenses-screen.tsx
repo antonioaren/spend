@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSpend } from '@/presentation/spend-context';
-import { Body, Field, GhostButton, PrimaryButton, Row, Screen, Title } from '@/presentation/components/ui';
-import { Choice, ChoiceRow } from '@/presentation/components/choice';
+import { Body, Field, GhostButton, PrimaryButton, Row, Screen, SelectField, Title } from '@/presentation/components/ui';
 import { formatMoney } from '@/domain/money';
 import { spacing, type } from '@/theme';
 import { DomainError } from '@/domain/errors';
@@ -60,7 +59,23 @@ export function ExpensesScreen() {
         </View>
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
           <GhostButton palette={palette} label={tx('expenses.filters')} onPress={() => setShowFilters((v) => !v)} />
-          <PrimaryButton palette={palette} label={tx('expenses.add')} onPress={() => setShowForm((v) => !v)} />
+          <PrimaryButton
+            palette={palette}
+            label={tx('expenses.add')}
+            onPress={() => {
+              setShowForm((open) => {
+                const next = !open;
+                if (next) {
+                  setForm((current) => ({
+                    ...current,
+                    cardId: current.cardId || state.cards[0]?.id || '',
+                    categoryId: current.categoryId || state.categories[0]?.id || '',
+                  }));
+                }
+                return next;
+              });
+            }}
+          />
         </View>
         {showFilters ? (
           <View style={{ gap: spacing.sm }}>
@@ -69,17 +84,15 @@ export function ExpensesScreen() {
             <Field palette={palette} label={tx('expenses.min')} value={filters.min} onChangeText={(min) => setFilters((f) => ({ ...f, min }))} keyboardType="decimal-pad" />
             <Field palette={palette} label={tx('expenses.max')} value={filters.max} onChangeText={(max) => setFilters((f) => ({ ...f, max }))} keyboardType="decimal-pad" />
             <Field palette={palette} label={tx('expenses.name')} value={filters.name} onChangeText={(name) => setFilters((f) => ({ ...f, name }))} />
-            <ChoiceRow>
-              {state.categories.map((category) => (
-                <Choice
-                  key={category.id}
-                  palette={palette}
-                  label={category.name}
-                  selected={filters.categoryId === category.id}
-                  onPress={() => setFilters((f) => ({ ...f, categoryId: category.id }))}
-                />
-              ))}
-            </ChoiceRow>
+            <SelectField
+              palette={palette}
+              label={tx('expenses.category')}
+              placeholder={tx('expenses.chooseCategory')}
+              emptyText={tx('expenses.noCategoriesYet')}
+              value={filters.categoryId}
+              options={state.categories.map((category) => ({ id: category.id, label: category.name }))}
+              onChange={(categoryId) => setFilters((f) => ({ ...f, categoryId }))}
+            />
             <PrimaryButton
               palette={palette}
               label={tx('expenses.apply')}
@@ -101,28 +114,24 @@ export function ExpensesScreen() {
           <View style={{ gap: spacing.sm }}>
             <Field palette={palette} label={tx('expenses.name')} value={form.name} onChangeText={(name) => setForm((f) => ({ ...f, name }))} />
             <Field palette={palette} label={tx('expenses.amount')} value={form.amount} onChangeText={(amount) => setForm((f) => ({ ...f, amount }))} keyboardType="decimal-pad" />
-            <ChoiceRow>
-              {state.cards.map((card) => (
-                <Choice
-                  key={card.id}
-                  palette={palette}
-                  label={card.name}
-                  selected={form.cardId === card.id}
-                  onPress={() => setForm((f) => ({ ...f, cardId: card.id }))}
-                />
-              ))}
-            </ChoiceRow>
-            <ChoiceRow>
-              {state.categories.map((category) => (
-                <Choice
-                  key={category.id}
-                  palette={palette}
-                  label={category.name}
-                  selected={form.categoryId === category.id}
-                  onPress={() => setForm((f) => ({ ...f, categoryId: category.id }))}
-                />
-              ))}
-            </ChoiceRow>
+            <SelectField
+              palette={palette}
+              label={tx('expenses.card')}
+              placeholder={tx('expenses.chooseCard')}
+              emptyText={tx('expenses.noCardsYet')}
+              value={form.cardId}
+              options={state.cards.map((card) => ({ id: card.id, label: card.name }))}
+              onChange={(cardId) => setForm((f) => ({ ...f, cardId }))}
+            />
+            <SelectField
+              palette={palette}
+              label={tx('expenses.category')}
+              placeholder={tx('expenses.chooseCategory')}
+              emptyText={tx('expenses.noCategoriesYet')}
+              value={form.categoryId}
+              options={state.categories.map((category) => ({ id: category.id, label: category.name }))}
+              onChange={(categoryId) => setForm((f) => ({ ...f, categoryId }))}
+            />
             <Field palette={palette} label={tx('expenses.date')} value={form.date} onChangeText={(date) => setForm((f) => ({ ...f, date }))} placeholder="YYYY-MM-DD" />
             <Field palette={palette} label={tx('expenses.time')} value={form.time} onChangeText={(time) => setForm((f) => ({ ...f, time }))} placeholder="HH:mm" />
             {error ? <Text style={[type.caption, { color: palette.danger }]}>{error}</Text> : null}
