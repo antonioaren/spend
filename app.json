@@ -16,6 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.antonioaren.spend",
+      "buildNumber": "1",
       "infoPlist": {
         "NSUbiquitousContainers": {
           "iCloud.com.antonioaren.spend": {
@@ -41,7 +42,8 @@
         "backgroundColor": "#F7F6F3"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.antonioaren.spend"
+      "package": "com.antonioaren.spend",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
