@@ -1,0 +1,16 @@
+---
+description: Spend TDD, DDD, and product rules
+alwaysApply: true
+---
+
+# Spend project rules
+
+- Follow `AGENTS.md`. Product rules are in `PRD.md` and `requirements.md`.
+- TDD only: failing test before production code. See `.agents/skills/test-driven-development/SKILL.md`.
+- Layers: `src/domain` → `src/application` → `src/infrastructure` → `src/presentation`. Routes only in `src/app`.
+- No user-visible English/Spanish literals in screens; use i18n.
+- Theme tokens from `src/theme`. Light and dark required.
+- Time without date is invalid. Missing date and time uses the clock at creation.
+- Storage: local Realm-shaped store by default; iCloud only when the account port says available.
+- Apple Shortcuts go through `AddExpenseFromShortcut`, not a second write path.
+- Keep diffs small. One feature or test slice per commit.
